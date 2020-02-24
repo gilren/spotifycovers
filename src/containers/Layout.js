@@ -8,8 +8,23 @@ import * as actions from '../store/actions'
 class Layout extends Component {
 
   componentDidMount(){
-      this.props.onSetAccessToken()
+      if (!this.props.isAuthenticated) {
+        const accessToken = this.getHashParams().access_token
+        if(accessToken !== undefined)
+        this.props.onSetAccessToken(accessToken)
+      }
     }
+
+  getHashParams() {
+      var hashParams = {};
+      var e,
+        r = /([^&;=]+)=?([^&;]*)/g,
+        q = window.location.hash.substring(1);
+      while ((e = r.exec(q))) {
+        hashParams[e[1]] = decodeURIComponent(e[2]);
+      }
+      return hashParams;
+  }
 
   render () {
 
@@ -32,7 +47,7 @@ const mapStateToProps = state => {
 
 const mapDispatchTopProps = dispatch => {
   return {
-    onSetAccessToken : () => dispatch(actions.setAccessToken()),
+    onSetAccessToken : (accessToken) => dispatch(actions.setAccessToken(accessToken)),
   }
 }
 

@@ -8,9 +8,9 @@ class CoverBuilder extends Component {
   }
 
   componentDidMount() {
-    
-    this.props.onGetPlaylists();
+    // this.props.onGetPlaylists();
 
+   this.props.onGetCover("1vSc3TYLrGYBkZTEGa9t5y" , 324)
   }
 
   render () {
@@ -27,13 +27,16 @@ class CoverBuilder extends Component {
 const mapStateToProps = state => {
   return {
     url: state.loginUrl,
-    playlists: state.playlists
+    playlists: state.playlists,
+    tracks: state.tracks,
+    cover: state.cover
   }
 }
 
 const mapDispatchTopProps = dispatch => {
   return {
     onGetPlaylists : () => dispatch(actions.getUserPlaylists()),
+    onGetCover: (playlists, total) => dispatch(actions.getCover(playlists, total))
   }
 }
 

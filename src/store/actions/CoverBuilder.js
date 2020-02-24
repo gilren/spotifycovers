@@ -9,16 +9,7 @@ const spotifyApi = new Spotify();
 // export const GET_TRACKS = 'GET_TRACKS'
 // export const GET_ALBUMS_COVER = 'GET_ALBUMS_COVER'
 
-function getHashParams() {
-  var hashParams = {};
-  var e,
-    r = /([^&;=]+)=?([^&;]*)/g,
-    q = window.location.hash.substring(1);
-  while ((e = r.exec(q))) {
-    hashParams[e[1]] = decodeURIComponent(e[2]);
-  }
-  return hashParams;
-}
+
 
 export const getAuthUrl = () => {
   const url = "https://accounts.spotify.com/authorize" 
@@ -32,13 +23,8 @@ export const getAuthUrl = () => {
   }
 }
 
-export const setAccessToken = () => {
-  const params = getHashParams();
-  const accessToken = params.access_token;
-  if (accessToken) {
-    spotifyApi.setAccessToken(accessToken);
-    
-  }
+export const setAccessToken = (accessToken) => {
+  spotifyApi.setAccessToken(accessToken);
   return {
     type: actionTypes.SET_ACCESS_TOKEN,
     accessToken: accessToken
@@ -52,6 +38,16 @@ export const getUserPlaylistsSuccess = (playlists) => {
   }
 }
 
+export const getPlaylistTracksSuccess = (tracks) => {
+  return {
+    type: actionTypes.GET_USER_PLAYLISTS,
+    tracks: tracks
+  }
+}
+
+/*
+  Get a user playlist from user which is defined in @setAccessToken
+*/
 export const getUserPlaylists = () => {
   return dispatch => {
     const playlistsResponse = spotifyApi.getUserPlaylists();
@@ -69,3 +65,91 @@ export const getUserPlaylists = () => {
     })
   }
 }
+
+const getPlaylistTracks = (playlistId) => {
+    const tracksResponse = spotifyApi.getPlaylistTracks(playlistId)
+}
+
+
+const getTracks = async (playlistId ,total) => {
+  const settings = getIterationAndRemainder(total, 100)
+  let tracks = []
+  for(let x = 0, ln = settings.iterations; x < ln; x++) {
+
+    let limit = credentials.GET_TRACKS_LIMIT
+    let offset = x * credentials.GET_TRACKS_LIMIT
+    if (settings.remainder > 0 && x === ln - 1) {
+      limit -= (credentials.GET_TRACKS_LIMIT - settings.remainder)
+    }
+    await spotifyApi.getPlaylistTracks(playlistId, {fields: 'total,items(track(album(id)))', limit: limit, offset: offset})
+    .then(data => {
+      data.items.forEach(element => {
+        tracks.push(element.track.album.id);
+      });
+    })
+  }
+  return tracks
+}
+
+// TODO : clean up sorting
+
+export const getCover = (playlistId ,total) => {
+  let albums = []
+  getTracks(playlistId, total).then(
+    (tracks) => {
+      
+      let duplicates = {};
+      tracks.forEach((x) => { duplicates[x] = (duplicates[x] || 0)+1; });
+      
+      let arrDuplicates = [];
+      
+      for (let album in duplicates) {
+        arrDuplicates.push([album, duplicates[album]]);
+      }
+      arrDuplicates.sort(function(a, b) {
+          return b[1] - a[1];
+      });
+      
+      albums.push(arrDuplicates.slice(0, 4).map( x => x[0]))
+      console.log(albums)
+    })
+
+
+  return dispatch => {
+
+  }
+}
+
+
+const getIterationAndRemainder = (total, limit) => {
+  var out = {
+    iterations: Math.floor(total / limit),
+    remainder: 0
+  }
+  if (total % limit !== 0) {
+    out.iterations++
+    out.remainder = total % limit
+  }
+  return out
+}
+
+
+export const getAlbums = () => {
+  return dispatch => {
+    const playlistsResponse = spotifyApi.getAlbums();
+    playlistsResponse
+    .then(res => {
+      console.log(res)
+      const playlists = res.items.map((playlistObject) => {
+        const { id, name } = playlistObject;
+        return { id: id, name: name };
+      });
+      dispatch(getUserPlaylistsSuccess(playlists))
+    })
+    .catch(err=> {
+      // console.log(err)
+    })
+  }
+}
+
+// uploadCustomPlaylistCoverImage

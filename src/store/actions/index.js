@@ -1,1 +1,1 @@
-export {getAuthUrl, setAccessToken, getUserPlaylists} from './CoverBuilder'
+export {getAuthUrl, setAccessToken, getUserPlaylists, getCover} from './CoverBuilder'

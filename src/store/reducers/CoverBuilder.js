@@ -14,7 +14,6 @@ export const updateObject = (oldObject, updatedProperties) => {
   }
 }
 
-
 export function getAuthUrl(state, action) {
   return updateObject(state, {loginUrl: action.loginUrl})
 }
@@ -26,6 +25,14 @@ export function setAccessToken(state, action) {
 export function getUserPlaylists(state, action) {
   return updateObject(state, {playlists: action.playlists})
 }
+
+export function getCover(state, action) {
+  return updateObject(state, {cover : action.cover})
+}
+
+
+
+// export function get
 
 
 /*
@@ -42,6 +49,7 @@ const reducer = (state = initialState, action) => {
     case actionTypes.GET_AUTH_URL: return getAuthUrl(state, action)
     case actionTypes.SET_ACCESS_TOKEN: return setAccessToken(state, action)
     case actionTypes.GET_USER_PLAYLISTS: return getUserPlaylists(state, action)
+    case actionTypes.GET_COVER: return getCover(state, action)
 
     default:
       return state
