@@ -83,40 +83,54 @@ const getTracks = async (playlistId ,total) => {
     }
     await spotifyApi.getPlaylistTracks(playlistId, {fields: 'total,items(track(album(id)))', limit: limit, offset: offset})
     .then(data => {
-      data.items.forEach(element => {
-        tracks.push(element.track.album.id);
-      });
+      tracks.push(data.items.map((trackObject) => {
+        return trackObject.track.album.id
+      }))
     })
   }
-  return tracks
+  return tracks.flat(1)
 }
 
 // TODO : clean up sorting
 
-export const getCover = (playlistId ,total) => {
-  let albums = []
-  getTracks(playlistId, total).then(
-    (tracks) => {
-      
-      let duplicates = {};
-      tracks.forEach((x) => { duplicates[x] = (duplicates[x] || 0)+1; });
-      
-      let arrDuplicates = [];
-      
-      for (let album in duplicates) {
-        arrDuplicates.push([album, duplicates[album]]);
-      }
-      arrDuplicates.sort(function(a, b) {
-          return b[1] - a[1];
-      });
-      
-      albums.push(arrDuplicates.slice(0, 4).map( x => x[0]))
-      console.log(albums)
-    })
-
+export const getCovers = (playlistId ,total) => {
 
   return dispatch => {
+    getTracks(playlistId, total).then(
+      (tracks) => {
+        
+        let albums = []
+        let duplicates = {};
+        tracks.forEach((x) => { duplicates[x] = (duplicates[x] || 0)+1; });
+        
+        let arrDuplicates = [];
+        
+        for (let album in duplicates) {
+          arrDuplicates.push([album, duplicates[album]]);
+        }
+        arrDuplicates.sort(function(a, b) {
+            return b[1] - a[1];
+        });
+        
+        albums.push(arrDuplicates.slice(0, 4).map( x => x[0]))
+        console.log(albums)
+  
+        let covers = []
+        spotifyApi.getAlbums(albums, {market :'from_token'}).then((data) => {
+          covers = data.albums.map((album) => {
+            return album.images[1].url
+          })
+        }).then(() => {
+          return dispatch(getCoversSuccess(covers))
+        })
+      })
+  }
+}
 
+export const getCoversSuccess = (covers) => {
+  return {
+    type: actionTypes.GET_COVERS,
+    covers: covers
   }
 }
 

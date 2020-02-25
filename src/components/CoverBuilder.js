@@ -10,7 +10,7 @@ class CoverBuilder extends Component {
   componentDidMount() {
     // this.props.onGetPlaylists();
 
-   this.props.onGetCover("1vSc3TYLrGYBkZTEGa9t5y" , 324)
+   this.props.onGetCovers("1vSc3TYLrGYBkZTEGa9t5y" , 324)
   }
 
   render () {
@@ -20,7 +20,19 @@ class CoverBuilder extends Component {
         return <li key={element.id}>{element.name}</li>
       })
     }
-    return <ul>{playlists}</ul>
+
+    let covers = null
+    if(this.props.covers){
+      covers = this.props.covers.map((element, index) => {
+        return <img src={element} alt="azz" />
+      })
+    }
+    return (
+      <div>
+        <ul>{playlists}</ul>
+        <ul>{covers}</ul>
+      </div>
+    )
   }
 }
 
@@ -29,14 +41,14 @@ const mapStateToProps = state => {
     url: state.loginUrl,
     playlists: state.playlists,
     tracks: state.tracks,
-    cover: state.cover
+    covers: state.covers
   }
 }
 
 const mapDispatchTopProps = dispatch => {
   return {
     onGetPlaylists : () => dispatch(actions.getUserPlaylists()),
-    onGetCover: (playlists, total) => dispatch(actions.getCover(playlists, total))
+    onGetCovers: (playlists, total) => dispatch(actions.getCovers(playlists, total))
   }
 }
 

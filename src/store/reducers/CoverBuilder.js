@@ -26,8 +26,8 @@ export function getUserPlaylists(state, action) {
   return updateObject(state, {playlists: action.playlists})
 }
 
-export function getCover(state, action) {
-  return updateObject(state, {cover : action.cover})
+export function getCovers(state, action) {
+  return updateObject(state, {covers : action.covers})
 }
 
 
@@ -49,7 +49,7 @@ const reducer = (state = initialState, action) => {
     case actionTypes.GET_AUTH_URL: return getAuthUrl(state, action)
     case actionTypes.SET_ACCESS_TOKEN: return setAccessToken(state, action)
     case actionTypes.GET_USER_PLAYLISTS: return getUserPlaylists(state, action)
-    case actionTypes.GET_COVER: return getCover(state, action)
+    case actionTypes.GET_COVERS: return getCovers(state, action)
 
     default:
       return state
