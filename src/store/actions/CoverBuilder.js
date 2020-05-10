@@ -53,10 +53,9 @@ export const getUserPlaylists = () => {
     const playlistsResponse = spotifyApi.getUserPlaylists();
     playlistsResponse
     .then(res => {
-      console.log(res)
       const playlists = res.items.map((playlistObject) => {
-        const { id, name } = playlistObject;
-        return { id: id, name: name };
+        const { id, name, tracks } = playlistObject;
+        return { id: id, name: name, total: tracks.total };
       });
       dispatch(getUserPlaylistsSuccess(playlists))
     })
@@ -81,12 +80,10 @@ const getTracks = async (playlistId ,total) => {
     if (settings.remainder > 0 && x === ln - 1) {
       limit -= (credentials.GET_TRACKS_LIMIT - settings.remainder)
     }
-    await spotifyApi.getPlaylistTracks(playlistId, {fields: 'total,items(track(album(id)))', limit: limit, offset: offset})
-    .then(data => {
-      tracks.push(data.items.map((trackObject) => {
+    const data = await spotifyApi.getPlaylistTracks(playlistId, {fields: 'total,items(track(album(id)))', limit: limit, offset: offset})
+    tracks.push(data.items.map((trackObject) => {
         return trackObject.track.album.id
-      }))
-    })
+    }))
   }
   return tracks.flat(1)
 }
@@ -112,15 +109,14 @@ export const getCovers = (playlistId ,total) => {
             return b[1] - a[1];
         });
         
-        albums.push(arrDuplicates.slice(0, 4).map( x => x[0]))
-        console.log(albums)
+        albums.push(arrDuplicates.slice(0, 5).map( x => x[0]))
+        
   
         let covers = []
         spotifyApi.getAlbums(albums, {market :'from_token'}).then((data) => {
           covers = data.albums.map((album) => {
             return album.images[1].url
           })
-        }).then(() => {
           return dispatch(getCoversSuccess(covers))
         })
       })
@@ -153,7 +149,7 @@ export const getAlbums = () => {
     const playlistsResponse = spotifyApi.getAlbums();
     playlistsResponse
     .then(res => {
-      console.log(res)
+      // console.log(res)
       const playlists = res.items.map((playlistObject) => {
         const { id, name } = playlistObject;
         return { id: id, name: name };
